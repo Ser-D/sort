@@ -3,9 +3,11 @@ import re
 import shutil
 import sys
 
-dict_dir = {}
-dict_file = {}
-new_dict_file = {}
+name_dir = []
+path_dir = []
+name_file = []
+path_file = []
+new_name_file = []
 trans_map = {}
 images_obj = []
 video_obj = []
@@ -28,11 +30,13 @@ transl_sym = ("a", "b", "v", "g", "d", "e", "e", "j", "z", "i", "j", "k", "l", "
 def search_dir(path):
     for i in os.listdir(path):
         if os.path.isdir(path + '\\' + i):
-            dict_dir[i] = path
+            name_dir.append(i)
+            path_dir.append(path)
             search_dir(path + '\\' + i)
         else:
-            dict_file[i] = path
-    return dict_dir, dict_file
+            name_file.append(i)
+            path_file.append(path)
+    return name_dir, path_dir, name_file, path_file
 
 def create_trans_dict():
     for c, l in zip(cyril_sym, transl_sym):
@@ -42,65 +46,62 @@ def create_trans_dict():
 
     
 def normalize():
-    new_key = ''
     file_in_list = []
-    for key, value in dict_file.items():
-        file_in_list = key.split('.')
+    for i, value in enumerate(name_file):
+        file_in_list = value.split('.')
         file_in_list[0] = file_in_list[0].translate(trans_map)
         file_in_list[0] = re.sub('\W', '_', file_in_list[0])
-        new_key = '.'.join(file_in_list[i] for i in range(len(file_in_list)))
-        new_dict_file[new_key] = value
-        os.rename(f'{value}\\{key}', f'{value}\\{new_key}')
-    return new_dict_file
+        new_name_file.append('.'.join(file_in_list[i] for i in range(len(file_in_list))))
+        os.rename(f'{path_file[i]}\\{value}', f'{path_file[i]}\\{new_name_file[i]}')
+    return new_name_file
 
 def move_file():
-    for key, value in new_dict_file.items():
-        file_in_list = key.split('.')
+    for i, value in enumerate(new_name_file):
+        file_in_list = value.split('.')
         ident_ext.add(file_in_list[-1])
         if file_in_list[-1] in images_file:
             if not os.path.exists(f'{path}\\images'):
                 os.mkdir(f'{path}\\images')
-            shutil.move(f'{value}\\{key}', f'{path}\\images\\{key}')
-            images_obj.append(key)
+            shutil.move(f'{path_file[i]}\\{value}', f'{path}\\images\\{value}')
+            images_obj.append(value)
         elif file_in_list[-1] in video_file:
             if not os.path.exists(f'{path}\\video'):
                 os.mkdir(f'{path}\\video')
-            shutil.move(f'{value}\\{key}', f'{path}\\video\\{key}')
-            video_obj.append(key)
+            shutil.move(f'{path_file[i]}\\{value}', f'{path}\\video\\{value}')
+            video_obj.append(value)
         elif file_in_list[-1] in doc_file:
             if not os.path.exists(f'{path}\\documents'):
                 os.mkdir(f'{path}\\documents')
-            shutil.move(f'{value}\\{key}', f'{path}\\documents\\{key}')
-            doc_obj.append(key)
+            shutil.move(f'{path_file[i]}\\{value}', f'{path}\\documents\\{value}')
+            doc_obj.append(value)
         elif file_in_list[-1] in audio_file:
             if not os.path.exists(f'{path}\\audio'):
                 os.mkdir(f'{path}\\audio')
-            shutil.move(f'{value}\\{key}', f'{path}\\audio\\{key}')
-            audio_obj.append(key)
+            shutil.move(f'{path_file[i]}\\{value}', f'{path}\\audio\\{value}')
+            audio_obj.append(value)
         elif file_in_list[-1] in arh_file:
             if not os.path.exists(f'{path}\\archives'):
                 os.mkdir(f'{path}\\archives')
             if not os.path.exists(f'{path}\\archives\\{file_in_list[0]}'):
                 os.mkdir(f'{path}\\archives\\{file_in_list[0]}')
-            shutil.unpack_archive(f'{value}\\{key}', f'{path}\\archives\\{file_in_list[0]}')
-            arh_obj.append(key)
-            os.remove(f'{value}\\{key}')
+            shutil.unpack_archive(f'{path_file[i]}\\{value}', f'{path}\\archives\\{file_in_list[0]}')
+            arh_obj.append(value)
+            os.remove(f'{path_file[i]}\\{value}')
         else:
             unident_ext.add(file_in_list[-1])
     return images_obj, video_obj, doc_obj, audio_obj, arh_obj, ident_ext, unident_ext
 
 
 def clean_dir():
-    for key, value in dict_dir.items():
-        print(dict_dir)
+    for i, value in enumerate(name_dir):
         try:    
-            os.rmdir(f'{value}\\{key}')
+            os.rmdir(f'{path_dir[i]}\\{value}')
         except OSError:
             print
 
 def rezult_hw():
-    if len(dict_file):
-        print(F'Було знайдено {len(dict_file)} файл(ів), в тому числі:')
+    if len(name_file):
+        print(F'Було знайдено {len(name_file)} файл(ів), в тому числі:')
         if len(images_obj):
             print(f'Зображення {images_obj}')
         if len(video_obj):
