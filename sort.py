@@ -52,7 +52,7 @@ def normalize():
         file_in_list[0] = file_in_list[0].translate(trans_map)
         file_in_list[0] = re.sub('\W', '_', file_in_list[0])
         new_name_file.append('.'.join(file_in_list[i] for i in range(len(file_in_list))))
-        os.rename(f'{path_file[i]}\\{value}', f'{path_file[i]}\\{new_name_file[i]}')
+        os.rename(os.path.join(path_file[i], value), os.path.join(path_file[i], new_name_file[i]))
     return new_name_file
 
 def move_file():
@@ -60,33 +60,33 @@ def move_file():
         file_in_list = value.split('.')
         ident_ext.add(file_in_list[-1])
         if file_in_list[-1] in images_file:
-            if not os.path.exists(f'{path}\\images'):
-                os.mkdir(f'{path}\\images')
-            shutil.move(f'{path_file[i]}\\{value}', f'{path}\\images\\{value}')
+            if not os.path.exists(os.path.join(path, 'images')):
+                os.mkdir(os.path.join(path, 'images'))
+            shutil.move(os.path.join(path_file[i], value), os.path.join(path, 'images', value))
             images_obj.append(value)
         elif file_in_list[-1] in video_file:
-            if not os.path.exists(f'{path}\\video'):
-                os.mkdir(f'{path}\\video')
-            shutil.move(f'{path_file[i]}\\{value}', f'{path}\\video\\{value}')
+            if not os.path.exists(os.path.join(path, 'video')):
+                os.mkdir(os.path.join(path, 'video'))
+            shutil.move(os.path.join(path_file[i], value), os.path.join(path, 'video', value))
             video_obj.append(value)
         elif file_in_list[-1] in doc_file:
-            if not os.path.exists(f'{path}\\documents'):
-                os.mkdir(f'{path}\\documents')
-            shutil.move(f'{path_file[i]}\\{value}', f'{path}\\documents\\{value}')
+            if not os.path.exists(os.path.join(path, 'documents')):
+                os.mkdir(os.path.join(path, 'documents'))
+            shutil.move(os.path.join(path_file[i], value), os.path.join(path, 'documents', value))
             doc_obj.append(value)
         elif file_in_list[-1] in audio_file:
-            if not os.path.exists(f'{path}\\audio'):
-                os.mkdir(f'{path}\\audio')
-            shutil.move(f'{path_file[i]}\\{value}', f'{path}\\audio\\{value}')
+            if not os.path.exists(os.path.join(path, 'audio')):
+                os.mkdir(os.path.join(path, 'audio'))
+            shutil.move(os.path.join(path_file[i], value), os.path.join(path, 'audio', value))
             audio_obj.append(value)
         elif file_in_list[-1] in arh_file:
-            if not os.path.exists(f'{path}\\archives'):
-                os.mkdir(f'{path}\\archives')
-            if not os.path.exists(f'{path}\\archives\\{file_in_list[0]}'):
-                os.mkdir(f'{path}\\archives\\{file_in_list[0]}')
-            shutil.unpack_archive(f'{path_file[i]}\\{value}', f'{path}\\archives\\{file_in_list[0]}')
+            if not os.path.exists(os.path.join(path, 'archives')):
+                os.mkdir(os.path.join(path, 'archives'))
+            if not os.path.exists(os.path.join(path, 'archives', file_in_list[0])):
+                os.mkdir(os.path.join(path, 'archives', file_in_list[0]))
+            shutil.unpack_archive(os.path.join(path_file[i], value), os.path.join(path, 'archives', file_in_list[0]))
             arh_obj.append(value)
-            os.remove(f'{path_file[i]}\\{value}')
+            os.remove(os.path.join(path_file[i], value))
         else:
             unident_ext.add(file_in_list[-1])
     return images_obj, video_obj, doc_obj, audio_obj, arh_obj, ident_ext, unident_ext
@@ -95,7 +95,7 @@ def move_file():
 def clean_dir():
     for i, value in enumerate(name_dir):
         try:    
-            os.rmdir(f'{path_dir[i]}\\{value}')
+            os.rmdir(os.path.join(path_dir[i], value))
         except OSError:
             print
 
@@ -116,10 +116,7 @@ def rezult_hw():
         print(f'Неідентифікованих розширеннь файлів {len(unident_ext)} {unident_ext if unident_ext else ""}')
 
 
-if len(sys.argv) < 2:
-    print('Введіть шлях до папки, що потребує сортування!')
-else:
-    path = sys.argv[1]
+def run_func():
     try:
         os.listdir(path)
     except OSError:
@@ -136,3 +133,10 @@ else:
             print("Об'єктів для сортування не знайдено")
 
 
+if len(sys.argv) < 2:
+    print('Введіть шлях до папки, що потребує сортування!')
+else:
+    path = sys.argv[1]
+    
+if __name__ == "__main__":
+    run_func()
